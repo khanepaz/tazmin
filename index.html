@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه کننده آزمایشگاهی</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    /* استایل کلی صفحه */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.calculator-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    margin: 50px auto;
+    max-width: 800px; /* محدود کردن عرض صفحه برای صفحه‌های بزرگ */
+}
+
+.result-box {
+    background-color: #e9f7ef;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 30px;
+    display: none;
+    border: 1px solid #d1e7dd;
+}
+
+.sample-input {
+    margin-bottom: 15px;
+}
+
+h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.btn-calculate {
+    background-color: #3498db;
+    border: none;
+    padding: 10px 25px;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-calculate:hover {
+    background-color: #2980b9;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-title {
+    font-size: 1rem;
+    color: #34495e;
+}
+
+.card-text {
+    font-size: 1.2rem;
+    color: #2ecc71;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.alert {
+    border-radius: 8px;
+    padding: 15px;
+    font-size: 0.9rem;
+}
+
+#hamed{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-bottom: 10px;
+}
+/* مدیا کوئری برای صفحه‌های کوچک */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px; /* کاهش اندازه فونت برای صفحه‌های کوچک */
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .calculator-container {
+        padding: 20px;
+        margin: 30px auto;
+    }
+
+    .btn-calculate {
+        font-size: 0.9rem;
+        padding: 8px 20px;
+    }
+
+    .card-title {
+        font-size: 0.9rem;
+    }
+
+    .card-text {
+        font-size: 1rem;
+    }
+
+    .table th,
+    .table td {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .alert {
+        font-size: 0.8rem;
+        padding: 10px;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="container calculator-container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center">سیستم محاسبه پارامترهای آزمایشگاهی</h2>
+                
+                <div class="mb-4">
+                    <label for="sampleCount" class="form-label">تعداد کل نمونه‌ها:</label>
+                    <input type="number" class="form-control" id="sampleCount" min="1" value="9">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="groupSize" class="form-label">روش دسته‌بندی (تعداد نمونه در هر دسته):</label>
+                    <select class="form-select" id="groupSize">
+                        <option value="2">دوتایی</option>
+                        <option value="3" selected>سه‌تایی</option>
+                        <option value="4">چهارتایی</option>
+                        <option value="5">پنج‌تایی</option>
+                    </select>
+                </div>
+                
+                <button id="generateInputs" class="btn btn-primary">تولید فیلدهای ورودی</button>
+                
+                <div id="inputContainer" class="mt-4"></div>
+                
+                <button id="calculateBtn" class="btn btn-success btn-calculate" style="display: none;">محاسبه نتایج</button>
+                
+                <div id="resultBox" class="result-box">
+                    <h4 class="text-center mb-4">نتایج محاسبات</h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">میانگین کل</h5>
+                                    <p id="meanResult" class="card-text fs-3 text-primary">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">انحراف معیار آزمایشگاهی (SL)</h5>
+                                    <p id="slResult" class="card-text fs-3 text-primary">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">محدوده x̄ ± 2SL</h5>
+                                    <p id="rangeResult" class="card-text fs-3 text-primary">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4" id="dataTable"></div>
+                </div>
+               
+            </div>
+          
+        </div>
+      
+    </div>
+    <div id="hamed" class="container">
+        <span>تهیه کننده : حامد خانه پز</span>
+    </div>
+   
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('generateInputs').addEventListener('click', function() {
+            const sampleCount = parseInt(document.getElementById('sampleCount').value);
+            const groupSize = parseInt(document.getElementById('groupSize').value);
+            const inputContainer = document.getElementById('inputContainer');
+            
+            // Validate input
+            if (sampleCount % groupSize !== 0) {
+                alert(`تعداد نمونه‌ها باید مضربی از ${groupSize} باشد!`);
+                return;
+            }
+            
+            inputContainer.innerHTML = '';
+            
+            // Create group headers and inputs
+            const groupCount = sampleCount / groupSize;
+            for (let i = 0; i < groupCount; i++) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'sample-group mb-4 p-3 border rounded';
+                groupDiv.innerHTML = `<h5 class="mb-3">دسته ${i+1}</h5>`;
+                
+                for (let j = 0; j < groupSize; j++) {
+                    const inputGroup = document.createElement('div');
+                    inputGroup.className = 'sample-input';
+                    inputGroup.innerHTML = `
+                        <label for="sample_${i}_${j}" class="form-label">نمونه ${j+1}:</label>
+                        <input type="number" class="form-control sample-value" id="sample_${i}_${j}" data-group="${i}">
+                    `;
+                    groupDiv.appendChild(inputGroup);
+                }
+                
+                inputContainer.appendChild(groupDiv);
+            }
+            
+            document.getElementById('calculateBtn').style.display = 'block';
+            document.getElementById('resultBox').style.display = 'none';
+        });
+        
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            const groupSize = parseInt(document.getElementById('groupSize').value);
+            const inputs = document.querySelectorAll('.sample-value');
+            const groups = {};
+            
+            // Group samples
+            inputs.forEach(input => {
+                const groupId = input.dataset.group;
+                if (!groups[groupId]) {
+                    groups[groupId] = [];
+                }
+                if (input.value) {
+                    groups[groupId].push(parseFloat(input.value));
+                }
+            });
+            
+            // Calculate group means
+            const groupMeans = [];
+            Object.values(groups).forEach(group => {
+                if (group.length > 0) {
+                    const sum = group.reduce((a, b) => a + b, 0);
+                    groupMeans.push(sum / group.length);
+                }
+            });
+            
+            // Calculate overall mean
+            const allSamples = [].concat(...Object.values(groups));
+            const overallMean = allSamples.reduce((a, b) => a + b, 0) / allSamples.length;
+            
+            // Calculate SL (within-group standard deviation)
+            let sumOfSquares = 0;
+            Object.values(groups).forEach(group => {
+                const groupMean = group.reduce((a, b) => a + b, 0) / group.length;
+                group.forEach(value => {
+                    sumOfSquares += Math.pow(value - groupMean, 2);
+                });
+            });
+            
+            const degreesOfFreedom = (allSamples.length - groupMeans.length);
+            const sl = Math.sqrt(sumOfSquares / degreesOfFreedom);
+            
+            // Calculate range
+            const lowerRange = overallMean - (2 * sl);
+            const upperRange = overallMean + (2 * sl);
+            
+            // Display results
+            document.getElementById('meanResult').textContent = overallMean.toFixed(2);
+            document.getElementById('slResult').textContent = sl.toFixed(2);
+            document.getElementById('rangeResult').textContent = `${lowerRange.toFixed(2)} تا ${upperRange.toFixed(2)}`;
+            
+            // Generate data table
+            let tableHtml = `
+                <h5 class="mt-4 mb-3">جزئیات محاسبات</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>دسته</th>
+                                <th>نمونه‌ها</th>
+                                <th>میانگین دسته</th>
+                                <th>انحراف از میانگین دسته</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            Object.entries(groups).forEach(([groupId, samples]) => {
+                const groupMean = samples.reduce((a, b) => a + b, 0) / samples.length;
+                
+                tableHtml += `
+                    <tr>
+                        <td>${parseInt(groupId)+1}</td>
+                        <td>${samples.join(', ')}</td>
+                        <td>${groupMean.toFixed(2)}</td>
+                        <td>
+                            ${samples.map(s => (s - groupMean).toFixed(2)).join(', ')}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHtml += `
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-info mt-3">
+                    <strong>توضیحات:</strong> انحراف معیار آزمایشگاهی (SL) با استفاده از واریانس درون‌دسته‌ای محاسبه شده است.
+                </div>
+            `;
+            
+            document.getElementById('dataTable').innerHTML = tableHtml;
+            document.getElementById('resultBox').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
